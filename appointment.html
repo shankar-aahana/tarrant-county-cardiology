@@ -117,23 +117,30 @@
 
       <div class="bg-white border border-brass/25 rounded-lg p-7 sm:p-10 lg:p-12">
 
-        <form action="https://formspree.io/f/mjgzpgna" method="POST" class="space-y-7">
+        <form id="appointment-form" action="https://formspree.io/f/mjgzpgna" method="POST" class="space-y-7">
 
           <div class="grid sm:grid-cols-2 gap-6">
             <div>
-              <label for="name" class="block text-navy font-medium text-base mb-2">Your name <span class="text-coral">*</span></label>
-              <input type="text" id="name" name="name" required class="w-full px-4 py-3 border border-brass/40 rounded-md bg-cream/40 text-charcoal placeholder:text-charcoal/40" placeholder="First and last name">
+              <label for="first_name" class="block text-navy font-medium text-base mb-2">First name <span class="text-coral">*</span></label>
+              <input type="text" id="first_name" name="first_name" required class="w-full px-4 py-3 border border-brass/40 rounded-md bg-cream/40 text-charcoal placeholder:text-charcoal/40" placeholder="First name">
             </div>
 
+            <div>
+              <label for="last_name" class="block text-navy font-medium text-base mb-2">Last name <span class="text-coral">*</span></label>
+              <input type="text" id="last_name" name="last_name" required class="w-full px-4 py-3 border border-brass/40 rounded-md bg-cream/40 text-charcoal placeholder:text-charcoal/40" placeholder="Last name">
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-6">
             <div>
               <label for="phone" class="block text-navy font-medium text-base mb-2">Phone number <span class="text-coral">*</span></label>
               <input type="tel" id="phone" name="phone" required class="w-full px-4 py-3 border border-brass/40 rounded-md bg-cream/40 text-charcoal placeholder:text-charcoal/40" placeholder="(817) 555-1234">
             </div>
-          </div>
 
-          <div>
-            <label for="email" class="block text-navy font-medium text-base mb-2">Email <span class="text-charcoal/50 text-sm">(optional)</span></label>
-            <input type="email" id="email" name="email" class="w-full px-4 py-3 border border-brass/40 rounded-md bg-cream/40 text-charcoal placeholder:text-charcoal/40" placeholder="you@example.com">
+            <div>
+              <label for="email" class="block text-navy font-medium text-base mb-2">Email <span class="text-charcoal/50 text-sm">(optional)</span></label>
+              <input type="email" id="email" name="email" class="w-full px-4 py-3 border border-brass/40 rounded-md bg-cream/40 text-charcoal placeholder:text-charcoal/40" placeholder="you@example.com">
+            </div>
           </div>
 
           <div>
@@ -177,6 +184,22 @@
           </div>
 
         </form>
+
+        <div id="form-success" class="hidden text-center py-8">
+          <div class="w-16 h-16 mx-auto bg-coral/15 rounded-full flex items-center justify-center mb-6">
+            <svg class="w-8 h-8 text-coral" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+          </div>
+          <h2 class="font-serif text-navy text-3xl sm:text-4xl mb-4">Thank you.</h2>
+          <p class="text-charcoal/85 text-lg leading-relaxed max-w-xl mx-auto mb-6">
+            We received your request. Our office will be in touch shortly to confirm a time that works for you.
+          </p>
+          <p class="text-charcoal/65 text-base">
+            If you need to reach us in the meantime, call <a href="tel:+18173364278" class="text-coral hover:text-coral-dark font-medium">(817) 336-4278</a>.
+          </p>
+        </div>
+
       </div>
 
     </div>
@@ -248,6 +271,44 @@
       </div>
     </div>
   </footer>
+
+  <script>
+    document.getElementById('appointment-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const submitButton = form.querySelector('button[type="submit"]');
+      const originalButtonHTML = submitButton.innerHTML;
+      submitButton.disabled = true;
+      submitButton.innerHTML = 'Sending…';
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (response.ok) {
+          form.style.display = 'none';
+          const success = document.getElementById('form-success');
+          success.classList.remove('hidden');
+          success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          const result = await response.json().catch(() => ({}));
+          const errorMessage = result.errors
+            ? result.errors.map(err => err.message).join(', ')
+            : 'Something went wrong. Please try again or call our office at (817) 336-4278.';
+          alert(errorMessage);
+          submitButton.disabled = false;
+          submitButton.innerHTML = originalButtonHTML;
+        }
+      } catch (error) {
+        alert('Connection error. Please try again or call our office at (817) 336-4278.');
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalButtonHTML;
+      }
+    });
+  </script>
 
 </body>
 </html>
